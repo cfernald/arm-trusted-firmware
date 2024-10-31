@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2022, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+ /dts-v1/;
+
+ #define	AFF	00
+
+//  #include "rdfremont-defs.dtsi"
+//  #undef POST
+ #define	POST \
+   };
+
+ / {
+   compatible = "arm,ffa-core-manifest-1.0";
+   #address-cells = <2>;
+   #size-cells = <2>;
+
+   attribute {
+     spmc_id = <0x8000>;
+     maj_ver = <0x1>;
+     min_ver = <0x1>;
+     exec_state = <0x0>;
+     load_address = <0x0 0x30000000>;
+     entrypoint = <0x0 0x30000000>;
+     binary_size = <0x80000>;
+   };
+
+   hypervisor {
+     compatible = "hafnium,hafnium";
+     vm1 {
+       is_ffa_partition;
+       debug_name = "stmm";
+       load_address = <0x0 0x20002000>;
+       vcpu_count = <1>;
+       mem_size = <0x0 0x300000>;
+     };
+     /* Example Service */
+     vm2 {
+       is_ffa_partition;
+       load_address = <0x0 0x20400000>;
+       debug_name = "therm";
+       vcpu_count = <1>;
+       mem_size = <0x400000>;
+     };
+   };
+
+   cpus {
+     #address-cells = <0x2>;
+     #size-cells = <0x0>;
+
+    cpu@0 {
+      device_type = "cpu";
+      reg = <0x0 0x0>;
+    };
+
+    cpu@3 {
+      device_type = "cpu";
+      reg = <0x0 0x3>;
+    };
+
+		cpu@2 {
+			device_type = "cpu";
+			reg = <0x0 0x2>;
+		};
+
+		cpu@1 {
+			device_type = "cpu";
+			reg = <0x0 0x1>;
+		};
+   };
+
+   memory@0 {
+     device_type = "memory"; /* Trusted DRAM */
+     reg = <0x0 0x20000000 0x0 0x20000000>;
+   };
+
+   memory@1 {
+		device_type = "device-memory"; /* UART */
+		reg = <0x0 0x60000000 0x0 0x00001000>;
+	};
+
+  memory@3 {
+		device_type = "device-memory"; /* UART */
+		reg = <0x0 0x60040000 0x0 0x00001000>;
+	};
+
+  memory@4 {
+		device_type = "device-memory"; /* FLASH */
+		reg = <0x0 0x01000000 0x0 0x000C0000>;
+	};
+
+  memory@5 {
+		device_type = "device-memory"; /* UART */
+		reg = <0x0 0x60030000 0x0 0x00001000>;
+	};
+
+  memory@6 {
+		device_type = "device-memory"; /* SP1 Test Carve-out */
+		reg = <0x00000100 0x1FFFE000 0x0 0x00001000>;
+	};
+
+   memory@2 {
+     device_type = "ns-memory";
+     reg = <0x00000100 0x00000000 0x0 0x80000000>;
+   };
+ };

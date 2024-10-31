@@ -148,10 +148,32 @@
  * Put BL3-1 at the top of the Trusted SRAM. BL31_BASE is calculated using the
  * current BL3-1 debug size plus a little space for growth.
  */
-#define BL31_SIZE			0x400000
+#define BL31_SIZE			0x440000
 #define BL31_BASE			(BL31_LIMIT - BL31_SIZE)
 #define BL31_LIMIT			(BL1_RW_BASE - FW_HANDOFF_SIZE)
 #define BL31_PROGBITS_LIMIT		BL1_RW_BASE
+
+/*
+ * Configuration defines.
+ *
+ * Put the configurtion data before Bl2.
+ *
+*/
+
+#define FW_CONFIG_LIMIT				BL2_BASE
+#define FW_CONFIG_BASE 				(FW_CONFIG_LIMIT - 0x4000)
+#define TB_FW_CONFIG_BASE			FW_CONFIG_BASE
+#define TB_FW_CONFIG_LIMIT		(TB_FW_CONFIG_BASE + PAGE_SIZE)
+#define TOS_FW_CONFIG_BASE		TB_FW_CONFIG_LIMIT
+#define TOS_FW_CONFIG_LIMIT		(TOS_FW_CONFIG_BASE + PAGE_SIZE)
+
+/*
+ * SPMD specific defines
+ *
+*/
+
+#define SPMD_BASE				0x30000000
+#define SPMD_LIMIT 			FW_CONFIG_BASE
 
 #if TRANSFER_LIST
 #define FW_HANDOFF_BASE			BL31_LIMIT
@@ -170,13 +192,12 @@
  * BL3-2 can execute from Secure SRAM, or Secure DRAM.
  */
 #define BL32_SRAM_BASE			BL_RAM_BASE
-#define BL32_SRAM_LIMIT			BL2_BASE
+#define BL32_SRAM_LIMIT			SPMD_BASE
 
-#define BL32_MEM_BASE			BL_RAM_BASE
-#define BL32_MEM_SIZE			(BL_RAM_SIZE - RME_GPT_DRAM_SIZE - \
-					BL1_SIZE - BL2_SIZE - BL31_SIZE)
-#define BL32_BASE			BL32_SRAM_BASE
-#define BL32_LIMIT			BL32_SRAM_LIMIT
+#define BL32_MEM_BASE			SPMD_BASE
+#define BL32_MEM_SIZE			(SPMD_LIMIT - SPMD_BASE)
+#define BL32_BASE					SPMD_BASE
+#define BL32_LIMIT			  SPMD_LIMIT
 
 #define NS_IMAGE_OFFSET			(NS_DRAM0_BASE + 0x20000000)
 #define NS_IMAGE_MAX_SIZE		(NS_DRAM0_SIZE - 0x20000000)
