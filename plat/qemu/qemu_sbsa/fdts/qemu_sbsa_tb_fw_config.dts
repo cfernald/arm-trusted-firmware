@@ -34,7 +34,7 @@
       owner = "Plat";
     };
     example {
-      uuid = "8064A10B-9A26-4DF8-9629-024B64058B4F";
+      uuid = "b8bcbd0c-8e8f-4ebe-99eb-3cbbdd0cd412";
       load-address = <0x20400000>;
       owner = "Plat";
     };
