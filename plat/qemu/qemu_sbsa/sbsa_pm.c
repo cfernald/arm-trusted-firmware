@@ -170,7 +170,7 @@ qemu_pwr_domain_pwr_down_wfi(const psci_power_state_t *target_state)
  ******************************************************************************/
 void qemu_pwr_domain_suspend(const psci_power_state_t *target_state)
 {
-	assert(false);
+	// assert(false);
 }
 
 /*******************************************************************************
@@ -193,7 +193,7 @@ void qemu_pwr_domain_on_finish(const psci_power_state_t *target_state)
  ******************************************************************************/
 void qemu_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
 {
-	assert(false);
+	// assert(false);
 }
 
 /*******************************************************************************
@@ -208,6 +208,11 @@ static void __dead2 qemu_system_off(void)
 static void __dead2 qemu_system_reset(void)
 {
 	mmio_write_32(SBSA_SECURE_EC_OFFSET, SBSA_SECURE_EC_CMD_REBOOT);
+	// We hacked the bl1 function to wait for any signal like this...
+	// Should not be used in production
+	uintptr_t *mailbox = (uintptr_t *)PLAT_QEMU_TRUSTED_MAILBOX_BASE;
+	*mailbox = (uintptr_t)0;
+
 	panic();
 }
 

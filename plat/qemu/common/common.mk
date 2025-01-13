@@ -49,7 +49,7 @@ BL1_SOURCES		+=	drivers/io/io_semihosting.c		\
 				lib/semihosting/semihosting.c		\
 				lib/semihosting/${ARCH}/semihosting_call.S	\
 				${PLAT_QEMU_COMMON_PATH}/qemu_io_storage.c	\
-				${PLAT_QEMU_COMMON_PATH}/${ARCH}/plat_helpers.S	\
+				${PLAT_QEMU_COMMON_PATH}/${ARCH}/plat_helpers_bl1.S	\
 				${PLAT_QEMU_COMMON_PATH}/qemu_bl1_setup.c	\
 				${QEMU_CPU_LIBS}
 

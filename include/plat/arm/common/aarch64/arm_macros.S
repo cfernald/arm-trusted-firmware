@@ -62,6 +62,8 @@ prefix:
 	mrs	x8, ICC_HPPIR0_EL1
 	mrs	x9, ICC_HPPIR1_EL1
 	mrs	x10, ICC_CTLR_EL3
+TestExc:
+	b	TestExc
 	/* Store to the crash buf and print to console */
 	bl	str_in_crash_buf_print
 	b	print_gic_common

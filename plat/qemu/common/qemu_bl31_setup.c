@@ -80,6 +80,7 @@ static entry_point_info_t bl33_image_ep_info;
 static entry_point_info_t rmm_image_ep_info;
 #endif
 static struct transfer_list_header *bl31_tl;
+void __dead2 plat_secondary_cold_boot_setup(void);
 
 /*******************************************************************************
  * Perform any BL3-1 early platform setup.  Here is an opportunity to copy
@@ -113,6 +114,11 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 	assert(params_from_bl2->h.version >= VERSION_2);
 
 	bl_params_node_t *bl_params = params_from_bl2->head;
+
+	// We hacked the bl1 function to wait for any signal like this...
+	// Should not be used in production
+	uintptr_t *mailbox = (uintptr_t *)PLAT_QEMU_TRUSTED_MAILBOX_BASE;
+	*mailbox = (uintptr_t)&plat_secondary_cold_boot_setup;
 
 	/*
 	 * Copy BL33, BL32 and RMM (if present), entry point information.
