@@ -1298,6 +1298,13 @@ uint64_t spmd_smc_handler(uint32_t smc_fid,
 		} else {
 			return spmd_ffa_error_return(handle, FFA_ERROR_NOT_SUPPORTED);
 		}
+	
+	case FFA_NS_RES_INFO_GET_SMC64:
+		return spmd_smc_forward(smc_fid, secure_origin,
+					x1, x2, x3, x4, cookie,
+					handle, flags);
+		break; /* not reached */
+
 	default:
 		WARN("SPM: Unsupported call 0x%08x\n", smc_fid);
 		return spmd_ffa_error_return(handle, FFA_ERROR_NOT_SUPPORTED);
