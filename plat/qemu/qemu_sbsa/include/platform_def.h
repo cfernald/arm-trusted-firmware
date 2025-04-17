@@ -16,6 +16,13 @@
 
 #define PLATFORM_STACK_SIZE		0x1000
 
+/*
+ * Maximum size of Event Log buffer used in Measured Boot Event Log driver
+ */
+#define	PLAT_EVENT_LOG_MAX_SIZE		UL(0x400)
+#define PLAT_DRTM_EVENT_LOG_MAX_SIZE		UL(0x300)
+#define PLAT_DRTM_MMAP_ENTRIES		12
+
 #define PLATFORM_MAX_CPUS_PER_CLUSTER	U(8)
 /*
  * Define the number of cores per cluster used in calculating core position.

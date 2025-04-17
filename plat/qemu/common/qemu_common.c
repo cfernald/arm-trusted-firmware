@@ -167,7 +167,7 @@ const mmap_region_t *plat_qemu_get_mmap(void)
 	return plat_qemu_mmap;
 }
 
-#if MEASURED_BOOT || TRUSTED_BOARD_BOOT
+#if MEASURED_BOOT || TRUSTED_BOARD_BOOT || DRTM_SUPPORT
 int plat_get_mbedtls_heap(void **heap_addr, size_t *heap_size)
 {
 	return get_mbedtls_heap_helper(heap_addr, heap_size);

@@ -891,6 +891,7 @@ endif #(DYN_DISABLE_AUTH)
 
 ifeq ($(MEASURED_BOOT)-$(TRUSTED_BOARD_BOOT),1-1)
 # Support authentication verification and hash calculation
+asdf
 	CRYPTO_SUPPORT := 3
 else ifeq ($(DRTM_SUPPORT)-$(TRUSTED_BOARD_BOOT),1-1)
 # Support authentication verification and hash calculation
