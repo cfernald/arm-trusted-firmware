@@ -47,6 +47,65 @@ ifeq (${SPM_MM},1)
 	BL31_SOURCES		+=	${PLAT_QEMU_COMMON_PATH}/qemu_spm.c
 endif
 
+ifeq ($(DRTM_SUPPORT), 1)
+		BL31_SOURCES		+= \
+				drivers/arm/smmu/smmu_v3.c	\
+				plat/qemu/qemu/qemu_drtm_stub.c \
+				drivers/delay_timer/delay_timer.c	\
+				drivers/delay_timer/generic_delay_timer.c
+
+		MEASURED_BOOT_MK := drivers/measured_boot/event_log/event_log.mk
+    $(info Including ${MEASURED_BOOT_MK})
+    include ${MEASURED_BOOT_MK}
+
+		BL31_SOURCES	        += 	${EVENT_LOG_SOURCES}
+
+		PLAT_INCLUDES		+=	-Iinclude/drivers/auth/mbedtls
+
+
+    CRYPTO_SOURCES	:=	drivers/auth/crypto_mod.c 	\
+				lib/fconf/fconf_tbbr_getter.c
+    BL1_SOURCES		+=	drivers/auth/crypto_mod.c
+    BL2_SOURCES		+=	drivers/auth/crypto_mod.c
+		BL31_SOURCES	+=	drivers/auth/crypto_mod.c
+
+    # We expect to locate the *.mk files under the directories specified below
+    CRYPTO_LIB_MK := drivers/auth/mbedtls/mbedtls_crypto.mk
+
+    $(info Including ${CRYPTO_LIB_MK})
+    include ${CRYPTO_LIB_MK}
+endif
+
+# Include Measured Boot makefile before any Crypto library makefile.
+# Crypto library makefile may need default definitions of Measured Boot build
+# flags present in Measured Boot makefile.
+ifeq (${MEASURED_BOOT},1)
+    MEASURED_BOOT_MK := drivers/measured_boot/event_log/event_log.mk
+    $(info Including ${MEASURED_BOOT_MK})
+    include ${MEASURED_BOOT_MK}
+
+    BL2_SOURCES		+=	plat/qemu/qemu/qemu_measured_boot.c	\
+				plat/qemu/qemu/qemu_helpers.c		\
+				${EVENT_LOG_SOURCES}
+
+     BL1_SOURCES	+=      plat/qemu/qemu/qemu_bl1_measured_boot.c
+
+endif
+
+ifeq (${SPMD_SPM_AT_SEL2}, 1)
+BL1_SOURCES += plat/common/plat_spmd_manifest.c
+
+BL2_SOURCES += ${PLAT_QEMU_COMMON_PATH}/qemu_io_storage.c \
+				common/uuid.c
+
+BL31_SOURCES += plat/common/plat_spmd_manifest.c
+
+TOS_FW_CONFIG		:=	${BUILD_PLAT}/fdts/qemu_sbsa_spmc_sp_manifest.dtb
+$(eval $(call TOOL_ADD_PAYLOAD,${TOS_FW_CONFIG},--tos-fw-config,${TOS_FW_CONFIG}))
+TB_FW_CONFIG		:=	${BUILD_PLAT}/fdts/qemu_sbsa_tb_fw_config.dtb
+$(eval $(call TOOL_ADD_PAYLOAD,${TB_FW_CONFIG},--tb-fw-config,${TB_FW_CONFIG}))
+endif
+
 # Use known base for UEFI if not given from command line
 # By default BL33 is at FLASH1 base
 PRELOADED_BL33_BASE	?= 0x10000000

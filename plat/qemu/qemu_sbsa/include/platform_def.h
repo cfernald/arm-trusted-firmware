@@ -16,6 +16,13 @@
 
 #define PLATFORM_STACK_SIZE		0x1000
 
+/*
+ * Maximum size of Event Log buffer used in Measured Boot Event Log driver
+ */
+#define	PLAT_EVENT_LOG_MAX_SIZE		UL(0x400)
+#define PLAT_DRTM_EVENT_LOG_MAX_SIZE		UL(0x300)
+#define PLAT_DRTM_MMAP_ENTRIES		12
+
 #define PLATFORM_MAX_CPUS_PER_CLUSTER	U(8)
 /*
  * Define the number of cores per cluster used in calculating core position.
@@ -82,7 +89,7 @@
  */
 #define NS_DRAM0_BASE			(PLAT_QEMU_DRAM0_BASE + \
 					NS_DRAM0_BASE_OFFSET)
-#define NS_DRAM0_SIZE			0x00020000000
+#define NS_DRAM0_SIZE			0x0002000000000
 
 #define SEC_SRAM_BASE			0x20000000
 #define SEC_SRAM_SIZE			0x20000000
@@ -190,8 +197,8 @@
 #define MAX_MMAP_REGIONS		15
 #define MAX_XLAT_TABLES			15
 #else
-#define MAX_MMAP_REGIONS		12
-#define MAX_XLAT_TABLES			12
+#define MAX_MMAP_REGIONS		13
+#define MAX_XLAT_TABLES			13
 #endif
 #define MAX_IO_DEVICES			3
 #define MAX_IO_HANDLES			4
@@ -213,7 +220,7 @@
 #define UART2_BASE			0x60040000
 #define UART2_CLK_IN_HZ			1
 
-#define PLAT_QEMU_BOOT_UART_BASE	UART0_BASE
+#define PLAT_QEMU_BOOT_UART_BASE	UART1_BASE
 #define PLAT_QEMU_BOOT_UART_CLK_IN_HZ	UART0_CLK_IN_HZ
 
 #define PLAT_QEMU_CRASH_UART_BASE	UART1_BASE

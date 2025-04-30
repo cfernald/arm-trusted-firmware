@@ -60,6 +60,7 @@ uint64_t plat_drtm_get_tcb_hash_table_size(void);
 uint64_t plat_drtm_get_imp_def_dlme_region_size(void);
 uint64_t plat_drtm_get_tcb_hash_features(void);
 uint64_t plat_drtm_get_acpi_tables_region_size(void);
+void plat_drtm_get_acpi_tables(void *acpi_tables_out, size_t acpi_tables_size);
 uint64_t plat_drtm_get_dlme_img_auth_features(void);
 
 /* DRTM error handling functions */

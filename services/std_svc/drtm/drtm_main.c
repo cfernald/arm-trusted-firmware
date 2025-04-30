@@ -302,6 +302,13 @@ static enum drtm_retc drtm_dl_prepare_dlme_data(const struct_drtm_dl_args *args)
 	 */
 	dlme_data_cursor += dlme_data_hdr->dlme_tcb_hashes_table_size;
 
+	/* Prepare ACPI tables region. */
+	if (dlme_data_hdr->dlme_acpi_tables_region_size != 0) {
+		plat_drtm_get_acpi_tables(dlme_data_cursor, dlme_data_hdr->dlme_acpi_tables_region_size);
+		dlme_data_cursor += dlme_data_hdr->dlme_acpi_tables_region_size;
+	}
+
+
 	/* Implementation-specific region size is unused. */
 	dlme_data_cursor += dlme_data_hdr->dlme_impdef_region_size;
 

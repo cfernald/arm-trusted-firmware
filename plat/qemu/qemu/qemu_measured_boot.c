@@ -101,7 +101,7 @@ void bl2_plat_mboot_finish(void)
 
 #if defined(SPD_tspd) || defined(SPD_spmd)
 	/* Set Event Log data in TOS_FW_CONFIG */
-	rc = qemu_set_tos_fw_info((uintptr_t)event_log_base,
+	rc = qemu_set_tos_fw_info(0, (uintptr_t)event_log_base,
 				 event_log_cur_size);
 	if (rc != 0) {
 		ERROR("%s(): Unable to update %s_FW_CONFIG\n",
