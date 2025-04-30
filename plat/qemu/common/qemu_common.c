@@ -159,6 +159,20 @@ const mmap_region_t plat_qemu_mmap[] = {
 };
 #endif
 
+#ifdef IMAGE_BL31
+static const mmap_region_t plat_qemu_drtm_mmap[] = {
+	MAP_DEVICE0,
+#ifdef MAP_DEVICE1
+	MAP_DEVICE1,
+#endif
+#ifdef MAP_DEVICE2
+	MAP_DEVICE2,
+#endif
+	MAP_NS_DRAM0,
+	{0}
+};
+#endif
+
 /*******************************************************************************
  * Returns QEMU platform specific memory map regions.
  ******************************************************************************/
@@ -166,6 +180,13 @@ const mmap_region_t *plat_qemu_get_mmap(void)
 {
 	return plat_qemu_mmap;
 }
+
+#ifdef IMAGE_BL31
+const mmap_region_t *plat_qemu_get_drtm_mmap(void)
+{
+	return plat_qemu_drtm_mmap;
+}
+#endif
 
 #if MEASURED_BOOT || TRUSTED_BOARD_BOOT || DRTM_SUPPORT
 int plat_get_mbedtls_heap(void **heap_addr, size_t *heap_size)

@@ -594,6 +594,7 @@ static uintptr_t xlat_tables_map_region(xlat_ctx_t *ctx, mmap_region_t *mm,
 		xlat_table_inc_regions_count(ctx, table_base);
 #endif
 
+	ERROR("FERN: while table_idx < table_entries: %d %d\n", table_idx, table_entries);
 	while (table_idx < table_entries) {
 
 		desc = table_base[table_idx];
@@ -611,10 +612,12 @@ static uintptr_t xlat_tables_map_region(xlat_ctx_t *ctx, mmap_region_t *mm,
 					  level);
 
 		} else if (action == ACTION_CREATE_NEW_TABLE) {
+			ERROR("FERN: new table\n");
 			uintptr_t end_va;
 
 			subtable = xlat_table_get_empty(ctx);
 			if (subtable == NULL) {
+				ERROR("FERN: nNOT ENOUGH TABLES\n");
 				/* Not enough free tables to map this region */
 				return table_idx_va;
 			}
@@ -632,8 +635,10 @@ static uintptr_t xlat_tables_map_region(xlat_ctx_t *ctx, mmap_region_t *mm,
 				XLAT_TABLE_ENTRIES * sizeof(uint64_t));
 #endif
 			if (end_va !=
-				(table_idx_va + XLAT_BLOCK_SIZE(level) - 1U))
+				(table_idx_va + XLAT_BLOCK_SIZE(level) - 1U)) {
+				ERROR("FERN SUBTABLE?\n");
 				return end_va;
+			}
 
 		} else if (action == ACTION_RECURSE_INTO_TABLE) {
 			uintptr_t end_va;
@@ -648,8 +653,10 @@ static uintptr_t xlat_tables_map_region(xlat_ctx_t *ctx, mmap_region_t *mm,
 				XLAT_TABLE_ENTRIES * sizeof(uint64_t));
 #endif
 			if (end_va !=
-				(table_idx_va + XLAT_BLOCK_SIZE(level) - 1U))
+				(table_idx_va + XLAT_BLOCK_SIZE(level) - 1U)) {
+				ERROR("FERN: RE-CURSED\n");
 				return end_va;
+			}
 
 		} else {
 
@@ -966,8 +973,10 @@ int mmap_add_dynamic_region_ctx(xlat_ctx_t *ctx, mmap_region_t *mm)
 	mm->attr |= MT_DYNAMIC;
 
 	ret = mmap_add_region_check(ctx, mm);
-	if (ret != 0)
+	if (ret != 0) {
+		ERROR("FERN: mmap_add_region_check failed \n");
 		return ret;
+	}
 
 	/*
 	 * Find the adequate entry in the mmap array in the same way done for
@@ -1018,8 +1027,11 @@ int mmap_add_dynamic_region_ctx(xlat_ctx_t *ctx, mmap_region_t *mm)
 			 * Check if the mapping function actually managed to map
 			 * anything. If not, just return now.
 			 */
-			if (mm->base_va >= end_va)
+			if (mm->base_va >= end_va) {
+				ERROR("FERN: mm->base_va >= end_va failed, %lx %lx \n",
+					mm->base_va, end_va);
 				return -ENOMEM;
+			}
 
 			/*
 			 * Something went wrong after mapping some table
@@ -1038,6 +1050,7 @@ int mmap_add_dynamic_region_ctx(xlat_ctx_t *ctx, mmap_region_t *mm)
 			xlat_clean_dcache_range((uintptr_t)ctx->base_table,
 				ctx->base_table_entries * sizeof(uint64_t));
 #endif
+			ERROR("NOMEM2:\n");
 			return -ENOMEM;
 		}
 
@@ -1062,13 +1075,17 @@ int mmap_add_dynamic_region_alloc_va_ctx(xlat_ctx_t *ctx, mmap_region_t *mm)
 {
 	mm->base_va = ctx->max_va + 1UL;
 
+	ERROR("ALLOC_VA: %llx : %lx \n", mm->base_pa, mm->size);
+	ERROR("ALLOC_VA: CTX %llx : %lx \n", ctx->max_pa, ctx->max_va);
+
 	if (mm->size == 0U)
-		return 0;
+	return 0;
 
 	mmap_alloc_va_align_ctx(ctx, mm);
 
 	/* Detect overflows. More checks are done in mmap_add_region_check(). */
 	if (mm->base_va < ctx->max_va) {
+		ERROR("NOMEM1: CTX %lx < %lx \n", mm->base_va, ctx->max_va);
 		return -ENOMEM;
 	}
 

@@ -12,6 +12,54 @@
 #include <drivers/auth/crypto_mod.h>
 #include "../common/qemu_private.h"
 
+// Requied for windows.
+typedef struct {
+  char Signature[4];
+  uint32_t Length;
+  uint8_t Revision;
+  uint8_t Checksum;
+  char OEMID[6];
+  char OEMTableID[8];
+  uint32_t OEMRevision;
+  uint32_t CreatorID;
+  uint32_t CreatorRevision;
+} __packed acpi_table_header_t;
+
+void build_empty_xdst(acpi_table_header_t *header) {
+	header->Signature[0] = 'X';
+	header->Signature[1] = 'D';
+	header->Signature[2] = 'S';
+	header->Signature[3] = 'T';
+	header->Length = sizeof(acpi_table_header_t);
+	header->Revision = 1;
+	header->Checksum = 0;
+	header->OEMID[0] = 'Q';
+	header->OEMID[1] = 'E';
+	header->OEMID[2] = 'M';
+	header->OEMID[3] = 'U';
+	header->OEMID[4] = ' ';
+	header->OEMID[5] = ' ';
+	header->OEMTableID[0] = 'D';
+	header->OEMTableID[1] = 'R';
+	header->OEMTableID[2] = 'T';
+	header->OEMTableID[3] = 'M';
+	header->OEMTableID[4] = 'X';
+	header->OEMTableID[5] = 'D';
+	header->OEMTableID[6] = 'S';
+	header->OEMTableID[7] = 'T';
+	header->OEMRevision = 1;
+	header->CreatorID = 0;
+	header->CreatorRevision = 1;
+
+	// Calculate checksum
+	uint8_t *ptr = (uint8_t *)header;
+	uint8_t sum = 0;
+	for (size_t i = 0; i < sizeof(acpi_table_header_t); i++) {
+		sum += ptr[i];
+	}
+	header->Checksum = 0 - sum;
+}
+
 /*
  * This file contains DRTM platform functions which don't really do anything on
  * FVP but are needed for DRTM to function.
@@ -55,7 +103,7 @@ void plat_enumerate_smmus(const uintptr_t **smmus_out,
 
 const mmap_region_t *plat_get_addr_mmap(void)
 {
-	return plat_qemu_get_mmap();
+	return plat_qemu_get_drtm_mmap();
 }
 
 /* Note-LPT:
@@ -133,5 +181,20 @@ void __dead2 plat_system_reset(void)
 	while(1) {};
 }
 
+
+uint64_t plat_drtm_get_acpi_tables_region_size(void)
+{
+	return sizeof(acpi_table_header_t);
+}
+
+void plat_drtm_get_acpi_tables(void *acpi_tables_out, size_t acpi_tables_size)
+{
+	build_empty_xdst((acpi_table_header_t *)acpi_tables_out);
+}
+
+uint64_t plat_drtm_get_dlme_img_auth_features(void)
+{
+	return 0ULL;
+}
 
 
