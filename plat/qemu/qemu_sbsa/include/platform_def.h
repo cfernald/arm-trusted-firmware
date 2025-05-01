@@ -191,8 +191,8 @@
 #define PLAT_PHY_ADDR_SPACE_SIZE	(1ull << 42)
 #define PLAT_VIRT_ADDR_SPACE_SIZE	(1ull << 42)
 #if SPM_MM
-#define MAX_MMAP_REGIONS		13
-#define MAX_XLAT_TABLES			13
+#define MAX_MMAP_REGIONS		14
+#define MAX_XLAT_TABLES			14
 #elif ENABLE_RME
 #define MAX_MMAP_REGIONS		15
 #define MAX_XLAT_TABLES			15
