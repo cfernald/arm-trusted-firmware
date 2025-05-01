@@ -48,6 +48,7 @@ ifeq (${SPM_MM},1)
 endif
 
 ifeq ($(DRTM_SUPPORT), 1)
+		BL31_CPPFLAGS	+=	-DPLAT_XLAT_TABLES_DYNAMIC
 		BL31_SOURCES		+= \
 				drivers/arm/smmu/smmu_v3.c	\
 				plat/qemu/qemu/qemu_drtm_stub.c \
@@ -92,19 +93,19 @@ ifeq (${MEASURED_BOOT},1)
 
 endif
 
-ifeq (${SPMD_SPM_AT_SEL2}, 1)
-BL1_SOURCES += plat/common/plat_spmd_manifest.c
+# ifeq (${SPMD_SPM_AT_SEL2}, 1)
+# BL1_SOURCES += plat/common/plat_spmd_manifest.c
 
-BL2_SOURCES += ${PLAT_QEMU_COMMON_PATH}/qemu_io_storage.c \
-				common/uuid.c
+# BL2_SOURCES += ${PLAT_QEMU_COMMON_PATH}/qemu_io_storage.c \
+# 				common/uuid.c
 
-BL31_SOURCES += plat/common/plat_spmd_manifest.c
+# BL31_SOURCES += plat/common/plat_spmd_manifest.c
 
-TOS_FW_CONFIG		:=	${BUILD_PLAT}/fdts/qemu_sbsa_spmc_sp_manifest.dtb
-$(eval $(call TOOL_ADD_PAYLOAD,${TOS_FW_CONFIG},--tos-fw-config,${TOS_FW_CONFIG}))
-TB_FW_CONFIG		:=	${BUILD_PLAT}/fdts/qemu_sbsa_tb_fw_config.dtb
-$(eval $(call TOOL_ADD_PAYLOAD,${TB_FW_CONFIG},--tb-fw-config,${TB_FW_CONFIG}))
-endif
+# TOS_FW_CONFIG		:=	${BUILD_PLAT}/fdts/qemu_sbsa_spmc_sp_manifest.dtb
+# $(eval $(call TOOL_ADD_PAYLOAD,${TOS_FW_CONFIG},--tos-fw-config,${TOS_FW_CONFIG}))
+# TB_FW_CONFIG		:=	${BUILD_PLAT}/fdts/qemu_sbsa_tb_fw_config.dtb
+# $(eval $(call TOOL_ADD_PAYLOAD,${TB_FW_CONFIG},--tb-fw-config,${TB_FW_CONFIG}))
+# endif
 
 # Use known base for UEFI if not given from command line
 # By default BL33 is at FLASH1 base

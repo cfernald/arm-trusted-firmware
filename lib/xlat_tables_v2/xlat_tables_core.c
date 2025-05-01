@@ -738,16 +738,25 @@ static int mmap_add_region_check(const xlat_ctx_t *ctx, const mmap_region_t *mm)
 
 #if PLAT_XLAT_TABLES_DYNAMIC
 			if (((mm->attr & MT_DYNAMIC) != 0U) ||
-			    ((mm_cursor->attr & MT_DYNAMIC) != 0U))
+			    ((mm_cursor->attr & MT_DYNAMIC) != 0U)) {
+
+				ERROR("TEST: 1\n");
 				return -EPERM;
+			}
 #endif /* PLAT_XLAT_TABLES_DYNAMIC */
 			if ((mm_cursor->base_va - mm_cursor->base_pa) !=
-							(base_va - base_pa))
+							(base_va - base_pa)) {
+
+				ERROR("TEST: 2\n");
 				return -EPERM;
+			}
 
 			if ((base_va == mm_cursor->base_va) &&
-						(size == mm_cursor->size))
+						(size == mm_cursor->size)) {
+
+				ERROR("TEST: 3\n");
 				return -EPERM;
+			}
 
 		} else {
 			/*
@@ -764,11 +773,16 @@ static int mmap_add_region_check(const xlat_ctx_t *ctx, const mmap_region_t *mm)
 			bool separated_va = (end_va < mm_cursor->base_va) ||
 				(base_va > mm_cursor_end_va);
 
-			if (!separated_va || !separated_pa)
+			if (!separated_va || !separated_pa) {
+				ERROR("separated_pa = %d = (%llx < %llx) || (%llx > %llx)\n", separated_pa, end_pa, mm_cursor->base_pa, base_pa, mm_cursor_end_pa);
+				ERROR("separated_va = %d = (%lx < %lx) || (%lx > %lx)\n", separated_va, end_va, mm_cursor->base_va, base_va, mm_cursor_end_va);
+				ERROR("TEST: 4\n");
 				return -EPERM;
+			}
 		}
 	}
 
+	ERROR("TEST: GOOD CHECK\n");
 	return 0;
 }
 
