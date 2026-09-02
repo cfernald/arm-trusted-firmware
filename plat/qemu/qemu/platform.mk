@@ -125,6 +125,40 @@ ifneq ($(filter 1,${MEASURED_BOOT} ${TRUSTED_BOARD_BOOT}),)
     include drivers/auth/mbedtls/mbedtls_crypto.mk
 endif
 
+ifeq (${DRTM_SUPPORT},1)
+MBOOT_EL_HASH_ALG	:=	sha256
+MEASURED_BOOT_MK := drivers/measured_boot/event_log/event_log.mk
+$(info Including ${MEASURED_BOOT_MK})
+include ${MEASURED_BOOT_MK}
+
+BL1_LIBS		+=	$(LIBEVLOG_LIBS)
+BL1_INCLUDE_DIRS	+=	$(LIBEVLOG_INCLUDE_DIRS)
+BL2_LIBS		+=	$(LIBEVLOG_LIBS)
+BL2_INCLUDE_DIRS	+=	$(LIBEVLOG_INCLUDE_DIRS)
+
+ifeq (${TRUSTED_BOARD_BOOT},0)
+CRYPTO_SOURCES	:=	drivers/auth/crypto_mod.c
+BL1_SOURCES	+=	${CRYPTO_SOURCES}
+BL2_SOURCES	+=	${CRYPTO_SOURCES}
+endif
+
+BL31_SOURCES	+=	${PLAT_QEMU_PATH}/qemu_drtm.c	\
+			drivers/arm/smmu/smmu_v3.c	\
+			drivers/auth/crypto_mod.c	\
+			drivers/delay_timer/delay_timer.c
+BL31_LIBS		+=	$(LIBEVLOG_LIBS)
+BL31_INCLUDE_DIRS	+=	$(LIBEVLOG_INCLUDE_DIRS)
+
+PLAT_INCLUDES	+=	-Iinclude/drivers/auth/mbedtls
+
+FCONF_TBB_SOURCES	:=	lib/fconf/fconf_tbbr_getter.c
+BL1_SOURCES		+=	${FCONF_TBB_SOURCES}		\
+			${FDT_WRAPPERS_SOURCES}
+BL2_SOURCES		+=	${FCONF_TBB_SOURCES}
+
+include drivers/auth/mbedtls/mbedtls_crypto.mk
+endif
+
 BL2_SOURCES		+=	common/uuid.c
 
 ifeq ($(add-lib-optee),yes)

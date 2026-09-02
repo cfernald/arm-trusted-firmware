@@ -10,12 +10,22 @@
 /* mbed TLS headers */
 #include <mbedtls/memory_buffer_alloc.h>
 #include <mbedtls/platform.h>
+#include <mbedtls/platform_util.h>
 #include <mbedtls/version.h>
 
 #include <common/debug.h>
 #include <drivers/auth/mbedtls/mbedtls_common.h>
 
 #include <plat/common/platform.h>
+
+void mbedtls_platform_zeroize(void *buffer, size_t length)
+{
+	volatile unsigned char *current = buffer;
+
+	while (length-- > 0U) {
+		*current++ = 0U;
+	}
+}
 
 static void cleanup(void)
 {

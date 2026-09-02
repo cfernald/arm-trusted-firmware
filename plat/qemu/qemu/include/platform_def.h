@@ -115,6 +115,7 @@
 #define TB_FW_CONFIG_LIMIT		(TB_FW_CONFIG_BASE + PAGE_SIZE)
 #define TOS_FW_CONFIG_BASE		TB_FW_CONFIG_LIMIT
 #define TOS_FW_CONFIG_LIMIT		(TOS_FW_CONFIG_BASE + PAGE_SIZE)
+#define TOS_FW_CONFIG_SIZE		(TOS_FW_CONFIG_LIMIT - TOS_FW_CONFIG_BASE)
 
 /*
  * BL1 specific defines.
@@ -207,8 +208,8 @@
 #define UART0_CLK_IN_HZ			1
 #define UART1_CLK_IN_HZ			1
 
-#define PLAT_QEMU_BOOT_UART_BASE	UART0_BASE
-#define PLAT_QEMU_BOOT_UART_CLK_IN_HZ	UART0_CLK_IN_HZ
+#define PLAT_QEMU_BOOT_UART_BASE	UART1_BASE
+#define PLAT_QEMU_BOOT_UART_CLK_IN_HZ	UART1_CLK_IN_HZ
 
 #define PLAT_QEMU_CRASH_UART_BASE	UART1_BASE
 #define PLAT_QEMU_CRASH_UART_CLK_IN_HZ	UART1_CLK_IN_HZ
@@ -299,6 +300,10 @@
  * Maximum size of Event Log buffer used in Measured Boot Event Log driver
  */
 #define PLAT_EVENT_LOG_MAX_SIZE UL(0x800)
+
+/* Maximum event log size and address map entries used by DRTM. */
+#define PLAT_DRTM_EVENT_LOG_MAX_SIZE UL(0x300)
+#define PLAT_DRTM_MMAP_ENTRIES U(3)
 
 #if SPMC_AT_EL3
 /*
