@@ -912,38 +912,6 @@ uint64_t drtm_smc_handler(uint32_t smc_fid,
 		SMC_RET1(handle, NOT_SUPPORTED);
 		break;  /* not reached */
 
-	case ARM_DRTM_SVC_REGISTER_ACPI_TABLES: {
-		uintptr_t va_mapping;
-		size_t va_mapping_size;
-		int rc;
-
-		if ((x1 % DRTM_PAGE_SIZE) != 0U || x2 == 0U) {
-			SMC_RET1(handle, INVALID_PARAMETERS);
-		}
-
-		va_mapping_size = ALIGNED_UP(x2, DRTM_PAGE_SIZE);
-		rc = plat_drtm_validate_ns_region(x1, va_mapping_size);
-		if (rc != 0) {
-			SMC_RET1(handle, INVALID_PARAMETERS);
-		}
-
-		rc = mmap_add_dynamic_region_alloc_va(x1, &va_mapping,
-			va_mapping_size, MT_NS | MT_RO_DATA | MT_SHAREABILITY_ISH);
-		if (rc != 0) {
-			SMC_RET1(handle, INTERNAL_ERROR);
-		}
-
-		flush_dcache_range(va_mapping, va_mapping_size);
-		rc = plat_drtm_register_acpi_tables((const void *)va_mapping, x2);
-
-		if (mmap_remove_dynamic_region(va_mapping, va_mapping_size) != 0) {
-			panic();
-		}
-
-		SMC_RET1(handle, rc == 0 ? SUCCESS : INVALID_DATA);
-		break;	/* not reached */
-	}
-
 	default:
 		ERROR("Unknown DRTM service function: 0x%x\n", smc_fid);
 		SMC_RET1(handle, SMC_UNK);

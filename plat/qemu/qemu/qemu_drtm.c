@@ -10,10 +10,14 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <arch_helpers.h>
+#include <common/runtime_svc.h>
 #include <event_measure.h>
+#include <lib/smccc.h>
 #include <lib/xlat_tables/xlat_tables_v2.h>
 #include <plat/common/platform.h>
 #include <platform_def.h>
+#include <smccc_helpers.h>
 
 #define MAP_DEVICE0_DRTM \
 	MAP_REGION_FLAT(DEVICE0_BASE, DEVICE0_SIZE, MT_DEVICE | MT_RW | EL3_PAS)
@@ -29,6 +33,12 @@
 #define QEMU_DRTM_ACPI_REGION_SIZE	U(0x4000)
 #define QEMU_DRTM_ACPI_TABLE_ALIGNMENT	U(8)
 #define QEMU_DRTM_NS_DRAM_SIZE		ULL(0x200000000)
+
+#define QEMU_SIP_SVC_REGISTER_DRTM_ACPI_TABLES	U(0xC200011A)
+
+#define QEMU_SIP_INVALID_PARAMETERS	(-2)
+#define QEMU_SIP_INTERNAL_ERROR		(-5)
+#define QEMU_SIP_INVALID_DATA		(-9)
 
 #define ACPI_APIC_SIGNATURE	U(0x43495041)
 #define ACPI_MCFG_SIGNATURE	U(0x4746434D)
@@ -215,8 +225,8 @@ void plat_drtm_get_acpi_tables(void *acpi_tables_out,
 	xsdt->checksum = (uint8_t)(0U - checksum);
 }
 
-int plat_drtm_register_acpi_tables(const void *acpi_tables,
-				   size_t acpi_tables_size)
+static int qemu_drtm_register_acpi_tables(const void *acpi_tables,
+					  size_t acpi_tables_size)
 {
 	const qemu_drtm_acpi_blob_header_t *blob = acpi_tables;
 	const qemu_acpi_table_header_t *table;
@@ -329,3 +339,61 @@ int plat_drtm_validate_ns_region(uintptr_t region_start, size_t region_size)
 
 	return 0;
 }
+
+static uintptr_t qemu_drtm_sip_handler(uint32_t smc_fid,
+				       u_register_t x1,
+				       u_register_t x2,
+				       u_register_t x3,
+				       u_register_t x4,
+				       void *cookie,
+				       void *handle,
+				       u_register_t flags)
+{
+	uintptr_t va_mapping;
+	size_t va_mapping_size;
+	int rc;
+
+	(void)x3;
+	(void)x4;
+	(void)cookie;
+
+	if (!is_caller_non_secure(flags) ||
+	    smc_fid != QEMU_SIP_SVC_REGISTER_DRTM_ACPI_TABLES) {
+		SMC_RET1(handle, SMC_UNK);
+	}
+
+	if (((x1 % PAGE_SIZE_4KB) != 0U) || (x2 == 0U) ||
+	    (x2 > QEMU_DRTM_ACPI_REGION_SIZE)) {
+		SMC_RET1(handle, QEMU_SIP_INVALID_PARAMETERS);
+	}
+
+	va_mapping_size = round_up((size_t)x2, PAGE_SIZE_4KB);
+	rc = plat_drtm_validate_ns_region(x1, va_mapping_size);
+	if (rc != 0) {
+		SMC_RET1(handle, QEMU_SIP_INVALID_PARAMETERS);
+	}
+
+	rc = mmap_add_dynamic_region_alloc_va(x1, &va_mapping,
+		va_mapping_size, MT_NS | MT_RO_DATA | MT_SHAREABILITY_ISH);
+	if (rc != 0) {
+		SMC_RET1(handle, QEMU_SIP_INTERNAL_ERROR);
+	}
+
+	flush_dcache_range(va_mapping, va_mapping_size);
+	rc = qemu_drtm_register_acpi_tables((const void *)va_mapping, x2);
+
+	if (mmap_remove_dynamic_region(va_mapping, va_mapping_size) != 0) {
+		panic();
+	}
+
+	SMC_RET1(handle, rc == 0 ? SMC_OK : QEMU_SIP_INVALID_DATA);
+}
+
+DECLARE_RT_SVC(
+	qemu_drtm_sip_svc,
+	OEN_SIP_START,
+	OEN_SIP_END,
+	SMC_TYPE_FAST,
+	NULL,
+	qemu_drtm_sip_handler
+);

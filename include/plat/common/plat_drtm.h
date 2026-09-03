@@ -63,8 +63,6 @@ uint64_t plat_drtm_get_acpi_tables_region_size(void);
 void plat_drtm_get_acpi_tables(void *acpi_tables_out,
 			       size_t acpi_tables_size,
 			       uintptr_t acpi_tables_paddr);
-int plat_drtm_register_acpi_tables(const void *acpi_tables,
-				   size_t acpi_tables_size);
 uint64_t plat_drtm_get_dlme_img_auth_features(void);
 
 /* DRTM error handling functions */
